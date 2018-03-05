@@ -31,7 +31,7 @@ map_view_for_city<-function(city){
     scale_fill_manual(values=geo_colors,guide=FALSE) +
     geom_sf(data = roads,
             size = .2, colour = "black") +
-    simple_map_theme +
+    map_theme +
     coord_sf(datum=st_crs(datum),
              xlim=c(bbox$xmin,bbox$xmax),
              ylim=c(bbox$ymin,bbox$ymax)) +
