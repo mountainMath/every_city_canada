@@ -1,0 +1,53 @@
+---
+title: "Every City Canada Demo"
+author: "Jens von Bergmann"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(tidyverse)
+library(sf)
+library(cancensus)
+library(cancensusHelpers)
+library(rtweet)
+#devtools::install_github("tarakc02/rmapzen")
+library(rmapzen)
+library(ggalt)
+library(grid)
+library(gridExtra)
+library(EveryCityCanada)
+```
+
+# How to use EveryCityCanada
+
+As input we need a city as returned by cancensus *list_census_regions*.
+```{r}
+cities=list_census_regions("CA16",use_cache = TRUE) %>% filter(level=="CSD",!is.na(CMA_UID),pop>=4000)
+city <- cities %>% sample_n(1)
+```
+
+# Plotting the city card
+To get the plot for the city we call the *every_city_plot* function. Gathering the data and drawing the vector map can take a little bit of time.
+```{r}
+image_path=every_city_plot(city)
+browseURL(image_path)
+```
+
+# Tweeting
+
+To tweet out a random city use the *send_every_city_tweet* function. Optionally specify the city to send out a tweet for a specific city. 
+
+```{r}
+#send_every_city_tweet(city)
+```
+

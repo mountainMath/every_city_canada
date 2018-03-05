@@ -1,13 +1,3 @@
-library(tidyverse)
-library(sf)
-library(cancensus)
-library(cancensusHelpers)
-library(rtweet)
-#devtools::install_github("tarakc02/rmapzen")
-library(rmapzen)
-library(ggalt)
-library(grid)
-library(gridExtra)
 
 
 #background_colour="white"
@@ -41,13 +31,12 @@ map_view_for_city<-function(city){
     scale_fill_manual(values=geo_colors,guide=FALSE) +
     geom_sf(data = roads,
             size = .2, colour = "black") +
-    map_theme +
+    simple_map_theme +
     coord_sf(datum=st_crs(datum),
              xlim=c(bbox$xmin,bbox$xmax),
              ylim=c(bbox$ymin,bbox$ymax)) +
     theme(panel.background = element_rect(fill = background_colour),
           plot.background = element_rect(fill  = background_colour))
-
 }
 
 
@@ -292,7 +281,7 @@ every_city_plot<-function(city,file_path="every_city_canada.png"){
   gs[[18]] <- city_time_plot(city)
   g<-arrangeGrob(grobs = gs, layout_matrix = lay, heights = heights, widths = widths)
   ggsave(file=file_path,g,dpi=102.4,width=10,height=5)
-  g
+  file_path
 }
 
 
