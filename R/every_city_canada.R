@@ -185,11 +185,12 @@ city_index_plot<-function(city,data_2016=NA){
 city_time_plot<-function(city,data_2016=NA,data_2006=NA){
   if (is.na(data_2016)) data_2016 = get_2016_data(city) %>% filter(GeoUID==city$region)
   if (is.na(data_2006)) data_2006 = get_2006_data(city)
-  city_time <- bind_rows(data_2016,data_2006) %>%
+  city_time <- bind_rows(data_2016 %>% select(-name,Type),data_2006 %>% select(-name,Type)) %>%
     rename(Income = income,
            Driver = driver,
            Bach = bach,
            Shelter = shelter) %>%
+    mutate(name=data_2016$name) %>%
     select(GeoUID, year, name, Income, Driver, Bach, Shelter) %>%
     tidyr::gather(measure, index, Income:Shelter) %>%
     tidyr::spread(year, index) %>%
@@ -296,7 +297,9 @@ every_city_plot<-function(city,file_path="every_city_canada.png"){
 
 
 send_every_city_tweet<-function(city=NA,media_feedback=TRUE){
-  tweeted_cities <- readRDS(file=file.path(getOption("custom_data_path"),"tweeted_cities"))
+  tweeted_cities_path <- file.path("data","tweeted_cities")
+  if (!file.exists(tweeted_cities_path)) stop("could not find tweeted cities list")
+  tweeted_cities <- readRDS(file=tweeted_cities_path)
   tmp <- tempfile(fileext = ".png")
   if (is.na(city)) {
     cities=list_census_regions("CA16",use_cache = TRUE) %>% filter(level=="CSD",!is.na(CMA_UID),pop>=4000)
@@ -309,6 +312,6 @@ send_every_city_tweet<-function(city=NA,media_feedback=TRUE){
   twitter_token=readRDS(file=file.path(getOption("custom_data_path"), "twitter_token.rds"))
   post_tweet(status=paste0(city$name,", Population ",scales::comma(city$pop)),
              media=tmp,token=twitter_token)
-  saveRDS(tweeted_cities,file=file.path(getOption("custom_data_path"),"tweeted_cities"))
+  saveRDS(tweeted_cities,file=tweeted_cities_path)
   unlink(tmp)
 }
