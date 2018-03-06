@@ -245,9 +245,20 @@ city_incomes_histogram <- function(city){
   income_plot
 }
 
+#' List of eligible cities
+#' @export
+cities_list <- function(){
+  cities_2006=list_census_regions("CA06",use_cache = TRUE) %>% filter(level=="CSD")
+  cma_2016=list_census_regions("CA16",use_cache = TRUE) %>% filter(level=="CMA")
+  list_census_regions("CA16",use_cache = TRUE) %>% filter(level=="CSD",pop>=4000,CMA_UID %in% cma_2016$region,region %in% cities_2006$region)
+}
 
 
-every_city_plot<-function(city,file_path="every_city_canada.png"){
+
+#' Generate every city canada card for city, returns path to image file
+#' @export
+every_city_plot<-function(city,file_path=NA){
+  if (is.na(file_path)) file_path <- tempfile(fileext= ".png")
   lay <- rbind(c(1,2,2,2,3,4,5),
                c(6,7,7,7,8,9,10),
                c(11,12,12,12,12,12,13),
@@ -290,7 +301,7 @@ every_city_plot<-function(city,file_path="every_city_canada.png"){
   gs[[23]] <- grobTree(rect_final, textGrob(label = "Statistics Canada 2016 & 2006", just="left"))
   gs[[9]] <- city_index_plot(city)
   gs[[17]] <- city_incomes_histogram(city)
-  gs[[7]] <- grobTree(rect_final, map_view_for_city(city))
+  gs[[7]] <- map_view_for_city(city)
   gs[[15]] <- age_pyramid_for_city(city)
   gs[[4]] <- grobTree(rect_final, textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "center", gp = gpar(cex = 2.5)))
   gs[[18]] <- city_time_plot(city)
@@ -299,16 +310,14 @@ every_city_plot<-function(city,file_path="every_city_canada.png"){
   file_path
 }
 
-
+#' Tweet out every city canada card for random city
+#' @export
 send_every_city_tweet<-function(city=NA,media_feedback=TRUE){
   tweeted_cities_path <- file.path("data","tweeted_cities")
   if (!file.exists(tweeted_cities_path)) stop("could not find tweeted cities list")
   tweeted_cities <- readRDS(file=tweeted_cities_path)
   tmp <- tempfile(fileext = ".png")
-  if (is.na(city)) {
-    cities=list_census_regions("CA16",use_cache = TRUE) %>% filter(level=="CSD",!is.na(CMA_UID),pop>=4000)
-    city <- cities %>% filter(!(region %in% tweeted_cities))%>% sample_n(1)
-  }
+  if (is.na(city)) city <- cities_list() %>% filter(!(region %in% tweeted_cities)) %>% sample_n(1)
   if (city$region %in% tweeted_cities) stop("already tweeted city")
   tweeted_cities <- c(tweeted_cities,city$region)
   p<-every_city_plot(city,tmp)
