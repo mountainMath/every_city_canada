@@ -1,4 +1,15 @@
-
+# Requires packages
+library(dplyr)
+library(tidyr)
+library(sf)
+library(ggplot2) # dev
+library(ggalt)
+library(grid)
+library(gridExtra)
+library(cancensus)
+library(cancensusHelpers) # dev
+library(rmapzen) # dev
+library(rtweet)
 
 #background_colour="white"
 background_colour="grey92"
@@ -82,7 +93,8 @@ age_pyramid_for_city<-function(city){
     annotate("text",label="(median)",x=88,y=max(age_data$Population)*0.9,color="black",size=5,hjust=1) +
     guides(fill=FALSE) +
     theme(panel.background = element_rect(fill = background_colour),
-          plot.background = element_rect(fill  = background_colour))
+          plot.background = element_rect(fill  = background_colour,
+                                         colour = background_colour))
 }
 
 get_2006_data<-function(city){
@@ -165,7 +177,8 @@ city_index_plot<-function(city,data_2016=NA){
                        labels = c("Less than CMA","More than CMA")) +
     labs(y = "", x = "", subtitle = "Comparison against local Census Metro Area") +
     theme(panel.background = element_rect(fill = background_colour),
-          plot.background = element_rect(fill  = background_colour),
+          plot.background = element_rect(fill  = background_colour,
+                                         colour = background_colour),
           panel.grid.major.x  =  element_blank(),
           panel.grid.minor.x  =  element_blank())
   index_plot
@@ -200,7 +213,8 @@ city_time_plot<-function(city,data_2016=NA,data_2006=NA){
     scale_x_continuous(labels=scales::percent) +
     labs(y = "", x = "", subtitle = "Timeline 2006 to 2016") +
     theme(panel.background = element_rect(fill = background_colour),
-          plot.background = element_rect(fill  = background_colour),
+          plot.background = element_rect(fill  = background_colour,
+                                         colour = background_colour),
           panel.grid.major.x  =  element_blank(),
           panel.grid.minor.x  =  element_blank())
   time_plot
@@ -224,7 +238,8 @@ city_incomes_histogram <- function(city){
     scale_y_continuous(labels = scales::comma) +
     labs(x = "", y = "", title = "Adjusted family income \nby deciles") +
     theme_void() +
-    theme(plot.background = element_rect(fill = background_colour),
+    theme(plot.background = element_rect(fill = background_colour,
+                                         colour = background_colour),
           panel.background = element_rect(fill = background_colour),
           plot.title = element_text(hjust = 0.5))
   income_plot
@@ -275,7 +290,7 @@ every_city_plot<-function(city,file_path="every_city_canada.png"){
   gs[[23]] <- grobTree(rect_final, textGrob(label = "Statistics Canada 2016 & 2006", just="left"))
   gs[[9]] <- city_index_plot(city)
   gs[[17]] <- city_incomes_histogram(city)
-  gs[[7]] <- map_view_for_city(city)
+  gs[[7]] <- grobTree(rect_final, map_view_for_city(city))
   gs[[15]] <- age_pyramid_for_city(city)
   gs[[4]] <- grobTree(rect_final, textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "center", gp = gpar(cex = 2.5)))
   gs[[18]] <- city_time_plot(city)
