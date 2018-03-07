@@ -32,7 +32,7 @@ library(EveryCityCanada)
 
 As input we need a city as returned by cancensus *list_census_regions*.
 ```{r}
-cities=list_census_regions("CA16",use_cache = TRUE) %>% filter(level=="CSD",!is.na(CMA_UID),pop>=4000)
+cities=cities_list()
 city <- cities %>% sample_n(1)
 ```
 
