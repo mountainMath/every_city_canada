@@ -47,7 +47,8 @@ map_view_for_city<-function(city){
              xlim=c(bbox$xmin,bbox$xmax),
              ylim=c(bbox$ymin,bbox$ymax)) +
     theme(panel.background = element_rect(fill = background_colour),
-          plot.background = element_rect(fill  = background_colour))
+          plot.background = element_rect(fill  = background_colour,
+                                         colour = background_colour))
 }
 
 
@@ -301,7 +302,7 @@ every_city_plot<-function(city,file_path=NA){
   gs[[23]] <- grobTree(rect_final, textGrob(label = "Statistics Canada 2016 & 2006", just="left"))
   gs[[9]] <- city_index_plot(city)
   gs[[17]] <- city_incomes_histogram(city)
-  gs[[7]] <- map_view_for_city(city)
+  gs[[7]] <- grobTree(rect_final, ggplotGrob(map_view_for_city(city)))
   gs[[15]] <- age_pyramid_for_city(city)
   gs[[4]] <- grobTree(rect_final, textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "center", gp = gpar(cex = 2.5)))
   gs[[18]] <- city_time_plot(city)
