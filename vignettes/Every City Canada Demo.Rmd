@@ -48,6 +48,6 @@ browseURL(image_path)
 To tweet out a random city use the *send_every_city_tweet* function. Optionally specify the city to send out a tweet for a specific city. 
 
 ```{r}
-#send_every_city_tweet(city)
+send_every_city_tweet(city)
 ```
 
