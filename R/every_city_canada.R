@@ -58,7 +58,7 @@ age_pyramid_for_city<-function(city){
     scale_x_discrete(breaks=c(seq(0, 100, 5),"100+")),
     scale_y_continuous(labels = scales::comma),
     coord_flip(),
-    scale_fill_brewer(palette = "Set1"),
+    scale_fill_manual(values = c("brown","lightblue")),
     theme_void()
   )
 
@@ -90,8 +90,8 @@ age_pyramid_for_city<-function(city){
     geom_vline(xintercept = med_age,size=1) +
     #annotate("text",label=format(city$pop,big.mark=","),x=95,y=min(age_data$Population)*0.9,color="black",size=7,hjust=0) +
     #annotate("text",label="Population",x=88,y=min(age_data$Population)*0.9,color="black",size=5,hjust=0) +
-    annotate("text",label=round(med_age,1),x=95,y=max(age_data$Population)*0.9,color="black",size=7,hjust=1) +
-    annotate("text",label="(median)",x=88,y=max(age_data$Population)*0.9,color="black",size=5,hjust=1) +
+    annotate("text",label=round(med_age,1),x=95,y=max(age_data$Population)*0.9,color="black",size=6,hjust=1) +
+    annotate("text",label="(median)",x=88,y=max(age_data$Population)*0.9,color="black",size=4,hjust=1) +
     guides(fill=FALSE) +
     theme(panel.background = element_rect(fill = background_colour),
           plot.background = element_rect(fill  = background_colour,
