@@ -93,6 +93,7 @@ age_pyramid_for_city<-function(city){
     annotate("text",label=round(med_age,1),x=95,y=max(age_data$Population)*0.9,color="black",size=6,hjust=1) +
     annotate("text",label="(median)",x=88,y=max(age_data$Population)*0.9,color="black",size=4,hjust=1) +
     guides(fill=FALSE) +
+    labs(subtitle = 'Age distribution') +
     theme(panel.background = element_rect(fill = background_colour),
           plot.background = element_rect(fill  = background_colour,
                                          colour = background_colour))
@@ -237,7 +238,7 @@ city_incomes_histogram <- function(city){
   income_plot <- ggplot(city_incomes, aes(x = decile, y = value)) +
     geom_bar(stat = "identity", fill = "brown") +
     scale_y_continuous(labels = scales::comma) +
-    labs(x = "", y = "", title = "Adjusted family income \nby deciles") +
+    labs(x = "", y = "", subtitle = "Adjusted family income \nby deciles") +
     theme_void() +
     theme(plot.background = element_rect(fill = background_colour,
                                          colour = background_colour),
@@ -297,14 +298,14 @@ every_city_plot<-function(city,file_path=NA){
   gs[[24]] <- rect_final
   #gs[[c(1,3,4,5,6,8,10,11,12,13,14,19,20,22,24)]] <- rectGrob(gp = gpar(fill  = "white", colour = "white"))
 
-  gs[[2]] <- grobTree(rect_final, textGrob(label = paste0(city$name," (",city$municipal_status,")"), just = "center", gp = gpar(cex = 2.5, fontface = "bold")))
-  gs[[21]] <- grobTree(rect_final, textGrob(label = "Made with <3 by @jens_vb and @dshkol"))
-  gs[[23]] <- grobTree(rect_final, textGrob(label = "Statistics Canada 2016 & 2006", just="left"))
+  gs[[2]] <- grobTree(rect_final, textGrob(label = paste0(city$name," (",city$municipal_status,")"), just = "left", x = 0.05, gp = gpar(cex = 2.5, fontface = "bold")))
+  gs[[21]] <- grobTree(rect_final, textGrob(label = "Made with <3 by @jens_vb and @dshkol", just = "left", x = 0.05))
+  gs[[23]] <- grobTree(rect_final, textGrob(label = "Statistics Canada 2016 & 2006", just="right", x = 0.95))
   gs[[9]] <- city_index_plot(city)
   gs[[17]] <- city_incomes_histogram(city)
   gs[[7]] <- grobTree(rect_final, ggplotGrob(map_view_for_city(city)))
   gs[[15]] <- age_pyramid_for_city(city)
-  gs[[4]] <- grobTree(rect_final, textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "center", gp = gpar(cex = 2.5)))
+  gs[[4]] <- grobTree(rect_final, textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "right", x =0.95, gp = gpar(cex = 2.5)))
   gs[[18]] <- city_time_plot(city)
   g<-arrangeGrob(grobs = gs, layout_matrix = lay, heights = heights, widths = widths)
   ggsave(file=file_path,g,dpi=102.4,width=10,height=5)
