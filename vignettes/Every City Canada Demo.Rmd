@@ -15,16 +15,17 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-library(tidyverse)
-library(sf)
-library(cancensus)
-library(cancensusHelpers)
-library(rtweet)
-#devtools::install_github("tarakc02/rmapzen")
-library(rmapzen)
-library(ggalt)
-library(grid)
-library(gridExtra)
+# library(tidyverse)
+# library(sf)
+# library(cancensus)
+# library(cancensusHelpers)
+# library(rtweet)
+# #devtools::install_github("tarakc02/rmapzen")
+# library(rmapzen)
+# library(ggalt)
+# library(grid)
+# library(gridExtra)
+# library(EveryCityCanada)
 library(EveryCityCanada)
 ```
 
@@ -33,7 +34,8 @@ library(EveryCityCanada)
 As input we need a city as returned by cancensus *list_census_regions*.
 ```{r}
 cities=cities_list()
-city <- cities %>% sample_n(1)
+city <- dplyr::sample_n(cities,1)
+paste0(city$name," (",city$municipal_status,"), Population: ",city$pop)
 ```
 
 # Plotting the city card
@@ -48,6 +50,6 @@ browseURL(image_path)
 To tweet out a random city use the *send_every_city_tweet* function. Optionally specify the city to send out a tweet for a specific city. 
 
 ```{r}
-send_every_city_tweet(city)
+send_every_city_tweet(city,tweeted_cities_path=file.path("..","data","tweeted_cities"))
 ```
 
