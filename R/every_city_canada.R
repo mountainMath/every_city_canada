@@ -242,24 +242,39 @@ cities_list <- function(){
   cancensus::list_census_regions("CA16",use_cache = TRUE) %>% dplyr::filter(level=="CSD",pop>=4000,CMA_UID %in% cma_2016$region,region %in% cities_2006$region)
 }
 
-
+# Add data about CMA and province
+city_details <- function(city) {
+  province = cancensus::list_census_regions("CA16", use_cache = TRUE) %>%
+    dplyr::filter(region == city$PR_UID) %>% pull(name)
+  cma = cancensus::list_census_regions("CA16", use_cache = TRUE) %>% 
+    dplyr::filter(region == city$CMA_UID) %>% pull(name)
+  details = list(province = province, cma = cma)
+  return(details)
+}
 
 #' Generate every city canada card for city, returns path to image file
 #' @export
 every_city_plot<-function(city,file_path=NA){
   if (is.na(file_path)) file_path <- tempfile(fileext= ".png")
+  
+  # Get city details
+  city_deets <- city_details(city)
+  
+  # Set up Grid layout
   lay <- rbind(c(1,2,2,2,3,4,5),
+               c(1,25,25,25,3,26,5),
                c(6,7,7,7,8,9,10),
                c(11,12,12,12,12,12,13),
                c(14,15,16,17,8,18,19),
                c(14,15,16,17,8,18,19),
                c(20,21,21,21,22,23,24))
 
-  widths <- c(0.25,4.5,0.25,4.5,0.25,10,0.25)
-  heights <- c(1,4,0.25,2,2,0.5)
+  widths <- c(0.25,4.625,0.25,4.625,0.25,10.5,0.25)
+  heights <- c(1,0.75,3.75,0.25,1.875,1.875,0.5)
 
+  # Set up default background for grid elements  
   rect_final<-grid::rectGrob(gp = grid::gpar(fill  = background_colour, col = background_colour))
-  gs <- lapply(1:24, function(ii)
+  gs <- lapply(1:26, function(ii)
     grid::grobTree(rect_final, grid::textGrob(ii)))
   #grobTree(rectGrob(gp=gpar(fill=ii, alpha=0.5)), textGrob(ii)))
   gridExtra::grid.arrange(grobs=gs, ncol=4,
@@ -283,16 +298,19 @@ every_city_plot<-function(city,file_path=NA){
   gs[[20]] <- rect_final
   gs[[22]] <- rect_final
   gs[[24]] <- rect_final
+  gs[[25]] <- rect_final
+  gs[[26]] <- rect_final
   #gs[[c(1,3,4,5,6,8,10,11,12,13,14,19,20,22,24)]] <- grid::rectGrob(gp = grid::gpar(fill  = "white", colour = "white"))
 
-  gs[[2]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(city$name," (",city$municipal_status,")"), just = "left", x = 0.05, gp = grid::gpar(cex = 2.0, fontface = "bold")))
+  gs[[2]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(city$name), just = "left", x = 0.05, gp = grid::gpar(cex = 2, fontface = "bold")))
+  gs[[25]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(city_deets$cma,", ",city_deets$province), just = "left", vjust = 0.1,  x = 0.05, gp = grid::gpar(cex = 1.25)))
   gs[[21]] <- grid::grobTree(rect_final, grid::textGrob(label = "Made with <3 by @jens_vb and @dshkol", just = "left", x = 0.05))
   gs[[23]] <- grid::grobTree(rect_final, grid::textGrob(label = "Statistics Canada 2016 & 2006", just="right", x = 0.95))
   gs[[9]] <- city_index_plot(city)
   gs[[17]] <- city_incomes_histogram(city)
   gs[[7]] <- grid::grobTree(rect_final, ggplot2::ggplotGrob(map_view_for_city(city)))
   gs[[15]] <- age_pyramid_for_city(city)
-  gs[[4]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "right", x =0.95, gp = grid::gpar(cex = 2.0)))
+  gs[[4]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "right", x =0.95, gp = grid::gpar(cex = 1.75)))
   gs[[18]] <- city_time_plot(city)
   g<-gridExtra::arrangeGrob(grobs = gs, layout_matrix = lay, heights = heights, widths = widths)
   ggplot2::ggsave(file=file_path,g,dpi=102.4,width=10,height=5)
