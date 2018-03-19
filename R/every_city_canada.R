@@ -38,7 +38,6 @@ map_view_for_city<-function(city){
                                          colour = background_colour))
 }
 
-
 age_pyramid_for_city<-function(city){
   # styling for graph
   age_pyramid_styling <- list(
@@ -94,11 +93,9 @@ get_2006_data<-function(city){
            driver=v_CA06_1101/v_CA06_1100,
            bach=v_CA06_1256/v_CA06_1248) %>%
     dplyr::mutate(year=2006) %>%
-    dplyr::select(GeoUID, Type, name = `Region Name`, income, driver, bach, shelter,year)
+    dplyr::select(GeoUID, Type, Population, name = `Region Name`, income, driver, bach, shelter, year)
   census_data
 }
-
-
 
 get_2016_data<-function(city){
   # Family income vectors
@@ -133,7 +130,7 @@ get_2016_data<-function(city){
            bach = `v_CA16_5123: University certificate, diploma or degree at bachelor level or above`/`v_CA16_4886: Total -  Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio - 25% sample data`,
            shelter = `v_CA16_4889: 30% to less than 100%`/`v_CA16_4886: Total -  Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio - 25% sample data`) %>%
     dplyr::mutate(year=2016) %>%
-    dplyr::select(GeoUID, Type, name = `Region Name`, income, driver, bach, shelter,year)
+    dplyr::select(GeoUID, Type, Population, name = `Region Name`, income, driver, bach, shelter,year)
 
   data_subset
 }
@@ -182,17 +179,18 @@ city_time_plot<-function(city,data_2016=NA,data_2006=NA){
            Bach = bach,
            Shelter = shelter) %>%
     dplyr::mutate(name=data_2016$name) %>%
-    dplyr::select(GeoUID, year, name, Income, Driver, Bach, Shelter) %>%
-    tidyr::gather(measure, index, Income:Shelter) %>%
+    dplyr::select(GeoUID, year, name, Population, Income, Driver, Bach, Shelter) %>%
+    tidyr::gather(measure, index, Population:Shelter) %>%
     tidyr::spread(year, index) %>%
     dplyr::mutate(measure = as.factor(measure))
 
   levels(city_time$measure) <- c("Share with Bach.\ndegree or higher",
                                  "Share drive\ncommute",
                                  "Median family\nincome",
+                                 "Population",
                                  "Share with shelter\ncosts > 30%")
 
-  city_time$measure <- factor(city_time$measure, levels(city_time$measure)[c(2,4,1,3)])
+  city_time$measure <- factor(city_time$measure, levels(city_time$measure)[c(2,5,1,3,4)])
 
   city_time <- city_time %>% dplyr::mutate(`2016`=`2016`/`2006`-1,`2006`=0)
 
@@ -242,24 +240,41 @@ cities_list <- function(){
   cancensus::list_census_regions("CA16",use_cache = TRUE) %>% dplyr::filter(level=="CSD",pop>=4000,CMA_UID %in% cma_2016$region,region %in% cities_2006$region)
 }
 
-
+# Add data about CMA and province
+city_details <- function(city) {
+  province = cancensus::list_census_regions("CA16", use_cache = TRUE) %>%
+    dplyr::filter(region == city$PR_UID) %>% pull(name)
+  cma = cancensus::list_census_regions("CA16", use_cache = TRUE) %>% 
+    dplyr::filter(region == city$CMA_UID) %>% pull(name)
+  cma_pop = cancensus::list_census_regions("CA16", use_cache = TRUE) %>% 
+    dplyr::filter(region == city$CMA_UID) %>% pull(pop)
+  details = list(province = province, cma = cma, cma_pop = cma_pop)
+  return(details)
+}
 
 #' Generate every city canada card for city, returns path to image file
 #' @export
 every_city_plot<-function(city,file_path=NA){
   if (is.na(file_path)) file_path <- tempfile(fileext= ".png")
+  
+  # Get city details
+  city_deets <- city_details(city)
+  
+  # Set up Grid layout
   lay <- rbind(c(1,2,2,2,3,4,5),
+               c(1,25,25,25,3,26,5),
                c(6,7,7,7,8,9,10),
                c(11,12,12,12,12,12,13),
                c(14,15,16,17,8,18,19),
                c(14,15,16,17,8,18,19),
                c(20,21,21,21,22,23,24))
 
-  widths <- c(0.25,4.5,0.25,4.5,0.25,10,0.25)
-  heights <- c(1,4,0.25,2,2,0.5)
+  widths <- c(0.25,4.625,0.25,4.625,0.25,10.5,0.25)
+  heights <- c(1,0.75,3.5,0.25,2,2,0.5)
 
+  # Set up default background for grid elements  
   rect_final<-grid::rectGrob(gp = grid::gpar(fill  = background_colour, col = background_colour))
-  gs <- lapply(1:24, function(ii)
+  gs <- lapply(1:26, function(ii)
     grid::grobTree(rect_final, grid::textGrob(ii)))
   #grobTree(rectGrob(gp=gpar(fill=ii, alpha=0.5)), textGrob(ii)))
   gridExtra::grid.arrange(grobs=gs, ncol=4,
@@ -283,16 +298,20 @@ every_city_plot<-function(city,file_path=NA){
   gs[[20]] <- rect_final
   gs[[22]] <- rect_final
   gs[[24]] <- rect_final
+  gs[[25]] <- rect_final
+  gs[[26]] <- rect_final
   #gs[[c(1,3,4,5,6,8,10,11,12,13,14,19,20,22,24)]] <- grid::rectGrob(gp = grid::gpar(fill  = "white", colour = "white"))
 
-  gs[[2]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(city$name," (",city$municipal_status,")"), just = "left", x = 0.05, gp = grid::gpar(cex = 2.0, fontface = "bold")))
+  gs[[2]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(city$name," (",city$municipal_status,")"), just = "left", x = 0.05, gp = grid::gpar(cex = 2, fontface = "bold")))
+  gs[[25]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(city_deets$cma," (CMA), ",city_deets$province), just = "left", vjust = 0.1,  x = 0.05, gp = grid::gpar(cex = 1.25)))
+  gs[[26]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(scales::percent(city$pop/city_deets$cma_pop)," of CMA total"), just = "right", vjust = 0.1,  x = 0.95, gp = grid::gpar(cex = 1.25)))
   gs[[21]] <- grid::grobTree(rect_final, grid::textGrob(label = "Made with <3 by @jens_vb and @dshkol", just = "left", x = 0.05))
   gs[[23]] <- grid::grobTree(rect_final, grid::textGrob(label = "Statistics Canada 2016 & 2006", just="right", x = 0.95))
   gs[[9]] <- city_index_plot(city)
   gs[[17]] <- city_incomes_histogram(city)
   gs[[7]] <- grid::grobTree(rect_final, ggplot2::ggplotGrob(map_view_for_city(city)))
   gs[[15]] <- age_pyramid_for_city(city)
-  gs[[4]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "right", x =0.95, gp = grid::gpar(cex = 2.0)))
+  gs[[4]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0("Population ", scales::comma(city$pop)), just = "right", x =0.95, gp = grid::gpar(cex = 1.75)))
   gs[[18]] <- city_time_plot(city)
   g<-gridExtra::arrangeGrob(grobs = gs, layout_matrix = lay, heights = heights, widths = widths)
   ggplot2::ggsave(file=file_path,g,dpi=102.4,width=10,height=5)
