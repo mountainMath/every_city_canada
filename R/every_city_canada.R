@@ -305,7 +305,7 @@ every_city_plot<-function(city,file_path=NA){
   gs[[2]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(city$name," (",city$municipal_status,")"), just = "left", x = 0.05, gp = grid::gpar(cex = 2, fontface = "bold")))
   gs[[25]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(city_deets$cma," (CMA), ",city_deets$province), just = "left", vjust = 0.1,  x = 0.05, gp = grid::gpar(cex = 1.25)))
   gs[[26]] <- grid::grobTree(rect_final, grid::textGrob(label = paste0(scales::percent(city$pop/city_deets$cma_pop)," of CMA total"), just = "right", vjust = 0.1,  x = 0.95, gp = grid::gpar(cex = 1.25)))
-  gs[[21]] <- grid::grobTree(rect_final, grid::textGrob(label = "Made with <3 by @jens_vb and @dshkol", just = "left", x = 0.05))
+  gs[[21]] <- grid::grobTree(rect_final, grid::textGrob(label = "Made with <3 by @vb_jens and @dshkol", just = "left", x = 0.05))
   gs[[23]] <- grid::grobTree(rect_final, grid::textGrob(label = "Statistics Canada 2016 & 2006", just="right", x = 0.95))
   gs[[9]] <- city_index_plot(city)
   gs[[17]] <- city_incomes_histogram(city)
