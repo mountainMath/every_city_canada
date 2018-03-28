@@ -127,7 +127,7 @@ get_2016_data<-function(city){
   data_subset <- city_data %>%
     dplyr::mutate(income = `v_CA16_2447: Median total income of economic families in 2015 ($)`,
            driver = `v_CA16_5795: Car, truck, van - as a driver`/`v_CA16_5792: Total - Main mode of commuting for the employed labour force aged 15 years and over in private households with a usual place of work or no fixed workplace address - 25% sample data`,
-           bach = `v_CA16_5123: University certificate, diploma or degree at bachelor level or above`/`v_CA16_4886: Total -  Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio - 25% sample data`,
+           bach = `v_CA16_5123: University certificate, diploma or degree at bachelor level or above`/`v_CA16_5096: Total - Highest certificate, diploma or degree for the population aged 25 to 64 years in private households - 25% sample data`,
            shelter = `v_CA16_4889: 30% to less than 100%`/`v_CA16_4886: Total -  Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio - 25% sample data`) %>%
     dplyr::mutate(year=2016) %>%
     dplyr::select(GeoUID, Type, Population, name = `Region Name`, income, driver, bach, shelter,year)
@@ -244,9 +244,9 @@ cities_list <- function(){
 city_details <- function(city) {
   province = cancensus::list_census_regions("CA16", use_cache = TRUE) %>%
     dplyr::filter(region == city$PR_UID) %>% pull(name)
-  cma = cancensus::list_census_regions("CA16", use_cache = TRUE) %>% 
+  cma = cancensus::list_census_regions("CA16", use_cache = TRUE) %>%
     dplyr::filter(region == city$CMA_UID) %>% pull(name)
-  cma_pop = cancensus::list_census_regions("CA16", use_cache = TRUE) %>% 
+  cma_pop = cancensus::list_census_regions("CA16", use_cache = TRUE) %>%
     dplyr::filter(region == city$CMA_UID) %>% pull(pop)
   details = list(province = province, cma = cma, cma_pop = cma_pop)
   return(details)
@@ -256,10 +256,10 @@ city_details <- function(city) {
 #' @export
 every_city_plot<-function(city,file_path=NA){
   if (is.na(file_path)) file_path <- tempfile(fileext= ".png")
-  
+
   # Get city details
   city_deets <- city_details(city)
-  
+
   # Set up Grid layout
   lay <- rbind(c(1,2,2,2,3,4,5),
                c(1,25,25,25,3,26,5),
@@ -272,7 +272,7 @@ every_city_plot<-function(city,file_path=NA){
   widths <- c(0.25,4.625,0.25,4.625,0.25,10.5,0.25)
   heights <- c(1,0.75,3.5,0.25,2,2,0.5)
 
-  # Set up default background for grid elements  
+  # Set up default background for grid elements
   rect_final<-grid::rectGrob(gp = grid::gpar(fill  = background_colour, col = background_colour))
   gs <- lapply(1:26, function(ii)
     grid::grobTree(rect_final, grid::textGrob(ii)))
