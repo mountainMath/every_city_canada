@@ -17,7 +17,13 @@ map_view_for_city<-function(city){
 
   # vector tiles return all layers (roads, water, buildings, etc) in a list
   roads <- rmapzen::as_sf(ucb_tiles$roads) %>% dplyr::filter(kind != "ferry")
-  water <- rmapzen::as_sf(ucb_tiles$water)
+  water <- NA #quick hack to deal with empty feature lists
+  if (length((ucb_tiles$water)$features)==0) {
+    water <- roads %>% filter(kind=="xxxx")
+  } else {
+    water <- rmapzen::as_sf(ucb_tiles$water)
+  }
+  #water <- ifelse(length((ucb_tiles$water)$features)==0,roads %>% filter(kind=="xxxx"),rmapzen::as_sf(ucb_tiles$water)) #quick hack to deal with empty feature list
 
   # make a quick static map that includes roads and oceans as reference
   ggplot2::ggplot() +
@@ -29,8 +35,9 @@ map_view_for_city<-function(city){
     ggplot2::scale_fill_manual(values=geo_colors,guide=FALSE) +
     ggplot2::geom_sf(data = roads,
             size = .2, colour = "black") +
-    cancensusHelpers::map_theme +
-    ggplot2::coord_sf(datum=sf::st_crs(datum),
+    #cancensusHelpers::map_theme +
+    theme_void() +
+    ggplot2::coord_sf(datum=NA,
              xlim=c(bbox$xmin,bbox$xmax),
              ylim=c(bbox$ymin,bbox$ymax)) +
     ggplot2::theme(panel.background = ggplot2::element_rect(fill = background_colour),
