@@ -2,6 +2,8 @@
 
 export(cities_list)
 export(every_city_plot)
+export(not_tweeted_cities_list)
 export(send_every_city_tweet)
+export(tweeted_cities_list)
 importFrom(dplyr,"%>%")
 importFrom(rlang,.data)

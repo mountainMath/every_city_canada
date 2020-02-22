@@ -5,7 +5,8 @@
 \title{Tweet out every city canada card for random city}
 \usage{
 send_every_city_tweet(city = NA, media_feedback = TRUE,
-  tweeted_cities_path = file.path("data", "tweeted_cities"))
+  tweeted_cities_path = file.path(here::here(), "data",
+  "tweeted_cities"))
 }
 \description{
 Tweet out every city canada card for random city

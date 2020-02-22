@@ -23,9 +23,9 @@ library(EveryCityCanada)
 
 As input we need a city as returned by cancensus *list_census_regions*.
 ```{r message=FALSE, warning=FALSE}
-cities=cities_list()
+cities=not_tweeted_cities_list()
 city <- dplyr::sample_n(cities,1)
-paste0(city$name," (",city$municipal_status,"), Population: ",city$pop)
+paste0(city$name," (",city$municipal_status,"), Population: ",scales::comma(city$pop))
 ```
 
 # Plotting the city card
@@ -39,7 +39,7 @@ browseURL(image_path)
 
 To tweet out a random city use the *send_every_city_tweet* function. Optionally specify the city to send out a tweet for a specific city. 
 
-```{r include=FALSE}
+```{r message=FALSE, include=FALSE}
 send_every_city_tweet(city,tweeted_cities_path=file.path("..","data","tweeted_cities"))
 ```
 

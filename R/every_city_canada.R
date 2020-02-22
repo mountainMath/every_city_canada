@@ -325,13 +325,26 @@ every_city_plot<-function(city,file_path=NA){
   file_path
 }
 
+
+#' List of cities already tweeted
+#' @export
+tweeted_cities_list <- function(tweeted_cities_path=file.path(here::here(),"data","tweeted_cities")){
+  readRDS(file=tweeted_cities_path)
+}
+
+#' List of cities that have not yet been tweeted
+#' @export
+not_tweeted_cities_list <- function(tweeted_cities_path=file.path(here::here(),"data","tweeted_cities")){
+  cities_list() %>% dplyr::filter(!(region %in% tweeted_cities_list(tweeted_cities_path)))
+}
+
 #' Tweet out every city canada card for random city
 #' @export
-send_every_city_tweet<-function(city=NA,media_feedback=TRUE,tweeted_cities_path=file.path("data","tweeted_cities")){
+send_every_city_tweet<-function(city=NA,media_feedback=TRUE,tweeted_cities_path=file.path(here::here(),"data","tweeted_cities")){
   if (!file.exists(tweeted_cities_path)) stop("could not find tweeted cities list")
-  tweeted_cities <- readRDS(file=tweeted_cities_path)
   tmp <- tempfile(fileext = ".png")
-  if (is.na(city)) city <- cities_list() %>% dplyr::filter(!(region %in% tweeted_cities)) %>% sample_n(1)
+  if (is.na(city)) city <- not_tweeted_cities_list(tweeted_cities_path) %>% sample_n(1)
+  tweeted_cities <- tweeted_cities_list(tweeted_cities_path)
   if (city$region %in% tweeted_cities) stop("already tweeted city")
   tweeted_cities <- c(tweeted_cities,city$region)
   p<-every_city_plot(city,tmp)
